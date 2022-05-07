@@ -1,5 +1,5 @@
 export default {
-  storeDomain: 'jstore123123.myshopify.com',
-  storefrontToken: 'bf3eee67ecfb322ad9dfd255c299d39d',
+  storeDomain: 'jackallyday1.myshopify.com',
+  storefrontToken: '9aa94922744ae24a7b5716203fde1dc0',
   storefrontApiVersion: '2022-04',
 };
