@@ -6,7 +6,7 @@ import {MoralisProvider} from 'react-moralis';
 import useAccount from '../hooks/useAccount';
 
 function Form() {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const {isAuthenticated, account, user, balance, connectMetamaskWallet} =
     useAccount();
   // const [email, setEmail] = useState('jack.nguyen@weareday.one');
@@ -33,6 +33,9 @@ function Form() {
         Moralis user session token: {user.getSessionToken()} {`==>`} Use this
         token to authenticate moralis user on the server
       </p>
+      <button onClick={() => navigate('/', {replace: true})}>
+        Back to home
+      </button>
     </div>
   );
   // return (

@@ -1,5 +1,6 @@
 import {useEffect, useState, useCallback} from 'react';
 import {useMoralis, useChain} from 'react-moralis';
+import axios from 'axios';
 
 import Token from '../abis/MIRL.json';
 
@@ -106,6 +107,27 @@ const useAccount = () => {
   useEffect(() => {
     getBalance();
   }, [getBalance]);
+
+  useEffect(() => {
+    if (user && account && currentChainId && balance !== null) {
+      console.log('Call login api route');
+      axios
+        .post('/auth/login', {
+          sessionToken: user.getSessionToken(),
+          account,
+          chainId: currentChainId,
+          balance,
+        })
+        .then((res) => console.log(res))
+        .catch((err) => console.error(err));
+    }
+  }, [user, account, currentChainId, balance]);
+
+  // useEffect(() => {
+  //   if (isAuthenticated && isInitialized && (!account || !currentChainId)) {
+  //     connectMetamaskWallet();
+  //   }
+  // }, [isAuthenticated, isInitialized]);
 
   return {
     Moralis,

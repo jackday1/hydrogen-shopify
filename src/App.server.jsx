@@ -1,4 +1,6 @@
 import renderHydrogen from '@shopify/hydrogen/entry-server';
+import {useSession} from '@shopify/hydrogen';
+
 import {
   Router,
   Route,
@@ -13,6 +15,9 @@ import NotFound from './components/NotFound.server';
 import CartProvider from './components/CartProvider.client';
 
 function App({routes}) {
+  const session = useSession();
+  console.log({session});
+
   return (
     <Suspense fallback={null}>
       <ShopifyProvider shopifyConfig={shopifyConfig}>
