@@ -21,7 +21,7 @@ export default function Index({country = {isoCode: 'US'}}) {
         <SeoForHomepage />
       </Suspense>
       <div className="relative mb-12">
-        <Welcome />
+        {/* <Welcome /> */}
         <Suspense fallback={<BoxFallback />}>
           <FeaturedProductsBox country={country} />
         </Suspense>
