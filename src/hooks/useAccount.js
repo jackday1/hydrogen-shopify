@@ -121,18 +121,38 @@ const useAccount = () => {
   }, [getBalance]);
 
   useEffect(() => {
-    if (user && account && currentChainId && balance !== null) {
-      // console.log('Call login api route');
-      axios
-        .post('/auth/login', {
-          sessionToken: user.getSessionToken(),
-          account,
-          chainId: currentChainId,
-          balance,
-        })
-        .then((res) => console.log(res))
-        .catch((err) => console.error(err));
+    // auto link account when user change account
+    if (user && account) {
+      const accounts = user.attributes.accounts;
+      if (!accounts.includes(account)) {
+        Moralis.link(account).then(() => {
+          console.log(`Linked account ${account}`);
+          window.location.reload();
+        });
+      } else if (currentChainId && balance !== null) {
+        axios
+          .post('/auth/login', {
+            sessionToken: user.getSessionToken(),
+            account,
+            chainId: currentChainId,
+            balance,
+          })
+          .then((res) => res.data.reload && window.location.reload())
+          .catch((err) => console.error(err));
+      }
     }
+    // if (user && account && currentChainId && balance !== null) {
+    //   // console.log('Call login api route');
+    //   axios
+    //     .post('/auth/login', {
+    //       sessionToken: user.getSessionToken(),
+    //       account,
+    //       chainId: currentChainId,
+    //       balance,
+    //     })
+    //     .then((res) => console.log(res))
+    //     .catch((err) => console.error(err));
+    // }
   }, [user, account, currentChainId, balance]);
 
   const logOut = async () => {

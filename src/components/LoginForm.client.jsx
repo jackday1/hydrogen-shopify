@@ -10,7 +10,7 @@ function Form() {
 
   const login = async () => {
     await connectMetamaskWallet();
-    // navigate('/', {replace: true});
+    navigate('/', {replace: true});
   };
 
   if (!isAuthenticated)

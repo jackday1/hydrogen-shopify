@@ -16,10 +16,18 @@ export async function api(request, {session}) {
         const user = await Moralis.User.become(sessionToken);
         if (!user) throw new Error('Bad credential');
 
-        console.log({account}, user.attributes.accounts);
-
         if (!user.attributes.accounts.includes(account))
           throw new Error('Bad credential 2');
+
+        const sessionObject = await session.get();
+        const currentSessionToken = sessionObject.sessionToken;
+        const currentAccount = sessionObject.account;
+        const currentChainId = sessionObject.chainId;
+
+        const reload =
+          currentSessionToken !== sessionToken ||
+          currentAccount !== account ||
+          currentChainId !== chainId;
 
         await Promise.all([
           session.set('sessionToken', sessionToken),
@@ -28,7 +36,7 @@ export async function api(request, {session}) {
           session.set('balance', balance),
         ]);
 
-        return new Response(null, {
+        return new Response(JSON.stringify({reload}), {
           status: 200,
           // headers: {'Set-Cookie': `accessToken=${accessToken}`},
         });

@@ -75,7 +75,7 @@ function Header({collections, storeName}) {
                   }}
                 />
               ) : (
-                <LoginBtn onClick={() => navigate('/login')} />
+                <LoginBtn onClick={connectMetamaskWallet} />
               )}
               <CartToggle
                 handleClick={() => {
