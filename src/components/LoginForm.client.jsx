@@ -71,7 +71,7 @@ const serverUrl = 'https://6zitu24v62ou.usemoralis.com:2053/server';
 
 export default function LoginForm() {
   return (
-    <MoralisProvider initializeOnMount={false}>
+    <MoralisProvider appId={appId} serverUrl={serverUrl}>
       <Form />
     </MoralisProvider>
   );

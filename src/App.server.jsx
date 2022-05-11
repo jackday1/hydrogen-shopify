@@ -16,7 +16,7 @@ import CartProvider from './components/CartProvider.client';
 
 function App({routes}) {
   const session = useSession();
-  console.log({session});
+  console.log('App session', {session});
 
   return (
     <Suspense fallback={null}>

@@ -1,19 +1,36 @@
 import {useEffect, useState} from 'react';
 import {Link} from '@shopify/hydrogen/client';
+import {MoralisProvider} from 'react-moralis';
 
 import CartToggle from './CartToggle.client';
 import {useCartUI} from './CartUIProvider.client';
 import CountrySelector from './CountrySelector.client';
 import Navigation from './Navigation.client';
 import MobileNavigation from './MobileNavigation.client';
+import LogoutBtn from './LogoutBtn.client';
+import LoginBtn from './LoginBtn';
+import useAccount from '../hooks/useAccount';
+
+const appId = 'mKu4P0mSPKHy23MV7IzqCdRxZIMbEvcKlbQE56d7';
+const serverUrl = 'https://6zitu24v62ou.usemoralis.com:2053/server';
 
 /**
  * A client component that specifies the content of the header on the website
  */
-export default function Header({collections, storeName}) {
+function Header({collections, storeName}) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [scrollbarWidth, setScrollbarWidth] = useState(0);
   const {isCartOpen} = useCartUI();
+  const {
+    isAuthenticated,
+    account,
+    user,
+    balance,
+    connectMetamaskWallet,
+    logOut,
+  } = useAccount();
+
+  // console.log({account, user, balance});
 
   useEffect(() => {
     const scrollbarWidth =
@@ -48,11 +65,23 @@ export default function Header({collections, storeName}) {
             >
               {storeName}
             </Link>
-            <CartToggle
-              handleClick={() => {
-                if (isMobileNavOpen) setIsMobileNavOpen(false);
-              }}
-            />
+            <div className="flex items-center">
+              {isAuthenticated ? (
+                <LogoutBtn
+                  onClick={() => {
+                    console.log('Logout');
+                    logOut();
+                  }}
+                />
+              ) : (
+                <LoginBtn onClick={connectMetamaskWallet} />
+              )}
+              <CartToggle
+                handleClick={() => {
+                  if (isMobileNavOpen) setIsMobileNavOpen(false);
+                }}
+              />
+            </div>
           </div>
           <Navigation collections={collections} storeName={storeName} />
         </div>
@@ -60,3 +89,9 @@ export default function Header({collections, storeName}) {
     </header>
   );
 }
+
+export default (props) => (
+  <MoralisProvider appId={appId} serverUrl={serverUrl}>
+    <Header {...props} />
+  </MoralisProvider>
+);

@@ -26,6 +26,7 @@ const useAccount = () => {
     authenticate,
     isInitialized,
     initialize,
+    logout,
     isAuthenticating,
     isAuthenticated,
     user,
@@ -37,9 +38,20 @@ const useAccount = () => {
 
   useEffect(() => {
     (async () => {
+      if (!Moralis.isWeb3Enabled()) {
+        await Moralis.enableWeb3();
+      }
+
       if (!isInitialized) {
         initialize({appId, serverUrl});
       }
+
+      if (currentChainId !== chainId) {
+        await switchNetwork(chainId);
+      }
+
+      const _web3 = new window.Web3(Moralis.provider);
+      setWeb3(_web3);
     })();
   }, []);
 
@@ -49,11 +61,11 @@ const useAccount = () => {
       return;
     }
 
-    await authenticate();
-
     if (!Moralis.isWeb3Enabled()) {
       await Moralis.enableWeb3();
     }
+
+    await authenticate();
 
     const _web3 = new window.Web3(Moralis.provider);
     setWeb3(_web3);
@@ -86,7 +98,7 @@ const useAccount = () => {
           owner: account,
         },
       });
-      console.log('balanceOf: ', balanceOfResult.toString());
+      // console.log('balanceOf: ', balanceOfResult.toString());
       setBalance(balanceOfResult.toNumber());
     } catch (err) {
       console.error(err.message);
@@ -110,7 +122,7 @@ const useAccount = () => {
 
   useEffect(() => {
     if (user && account && currentChainId && balance !== null) {
-      console.log('Call login api route');
+      // console.log('Call login api route');
       axios
         .post('/auth/login', {
           sessionToken: user.getSessionToken(),
@@ -122,6 +134,12 @@ const useAccount = () => {
         .catch((err) => console.error(err));
     }
   }, [user, account, currentChainId, balance]);
+
+  const logOut = async () => {
+    await logout();
+    await axios.delete('/auth/login');
+    window.location.reload();
+  };
 
   // useEffect(() => {
   //   if (isAuthenticated && isInitialized && (!account || !currentChainId)) {
@@ -136,6 +154,7 @@ const useAccount = () => {
     user,
     account,
     balance,
+    logOut,
     connectMetamaskWallet,
   };
 };
