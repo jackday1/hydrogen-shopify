@@ -16,8 +16,10 @@ export async function api(request, {session}) {
         const user = await Moralis.User.become(sessionToken);
         if (!user) throw new Error('Bad credential');
 
+        console.log({account}, user.attributes.accounts);
+
         if (!user.attributes.accounts.includes(account))
-          throw new Error('Bad credential');
+          throw new Error('Bad credential 2');
 
         await Promise.all([
           session.set('sessionToken', sessionToken),
@@ -32,7 +34,7 @@ export async function api(request, {session}) {
         });
       } catch (err) {
         console.error(err.message);
-        return new Response(null, {
+        return new Response(err.message, {
           status: 401,
         });
       }

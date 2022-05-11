@@ -10,7 +10,7 @@ function Form() {
 
   const login = async () => {
     await connectMetamaskWallet();
-    navigate('/', {replace: true});
+    // navigate('/', {replace: true});
   };
 
   if (!isAuthenticated)
@@ -25,14 +25,17 @@ function Form() {
       </div>
     );
   return (
-    <div className="h-100 flex justify-between items-center">
+    <div className="h-screen w-screen flex flex-col justify-center items-center">
       <p>Logged account: {account}</p>
       <p>Balance: {balance}</p>
       <p>
         Moralis user session token: {user.getSessionToken()} {`==>`} Use this
         token to authenticate moralis user on the server
       </p>
-      <button onClick={() => navigate('/', {replace: true})}>
+      <button
+        className="bg-orange-500 rounded px-4 py-2 text-white font-semibold transition ease-in-out hover:bg-orange-600"
+        onClick={() => navigate('/', {replace: true})}
+      >
         Back to home
       </button>
     </div>
