@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Link} from '@shopify/hydrogen/client';
+import {Link, useNavigate} from '@shopify/hydrogen/client';
 import {MoralisProvider} from 'react-moralis';
 
 import CartToggle from './CartToggle.client';
@@ -18,6 +18,7 @@ const serverUrl = 'https://6zitu24v62ou.usemoralis.com:2053/server';
  * A client component that specifies the content of the header on the website
  */
 function Header({collections, storeName}) {
+  const navigate = useNavigate();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [scrollbarWidth, setScrollbarWidth] = useState(0);
   const {isCartOpen} = useCartUI();
@@ -74,7 +75,7 @@ function Header({collections, storeName}) {
                   }}
                 />
               ) : (
-                <LoginBtn onClick={connectMetamaskWallet} />
+                <LoginBtn onClick={() => navigate('/login')} />
               )}
               <CartToggle
                 handleClick={() => {

@@ -1,6 +1,4 @@
-import {useState} from 'react';
 import {useNavigate} from '@shopify/hydrogen/client';
-import axios from 'axios';
 import {MoralisProvider} from 'react-moralis';
 
 import useAccount from '../hooks/useAccount';
@@ -9,24 +7,25 @@ function Form() {
   const navigate = useNavigate();
   const {isAuthenticated, account, user, balance, connectMetamaskWallet} =
     useAccount();
-  // const [email, setEmail] = useState('jack.nguyen@weareday.one');
-  // const [password, setPassword] = useState('123123');
-  // const login = async () => {
-  //   try {
-  //     if (!email || !password) return
-  //     await axios.post('/auth/login', { email, password }, { withCredentials: true });
-  //     navigate("/", { replace: true })
-  //   } catch(err) {
-  //     console.error(err)
-  //   }
-  // };
-  // console.log({account, user});
+
+  const login = async () => {
+    await connectMetamaskWallet();
+    navigate('/', {replace: true});
+  };
+
   if (!isAuthenticated)
     return (
-      <button onClick={connectMetamaskWallet}>Connect metamask wallet</button>
+      <div className="h-screen w-screen flex justify-center items-center">
+        <button
+          className="bg-orange-500 rounded px-4 py-2 text-white font-semibold transition ease-in-out hover:bg-orange-600"
+          onClick={login}
+        >
+          Connect metamask wallet
+        </button>
+      </div>
     );
   return (
-    <div>
+    <div className="h-100 flex justify-between items-center">
       <p>Logged account: {account}</p>
       <p>Balance: {balance}</p>
       <p>
@@ -38,32 +37,6 @@ function Form() {
       </button>
     </div>
   );
-  // return (
-  //   <div
-  //     style={{
-  //       padding: 16,
-  //       display: 'flex',
-  //       flexDirection: 'column',
-  //       alignItems: 'center',
-  //       justifyContent: 'center',
-  //     }}
-  //   >
-  //     <input
-  //       name="email"
-  //       value={email}
-  //       onChange={(e) => setEmail(e.target.value)}
-  //       placeholder="Email"
-  //     />
-  //     <input
-  //       name="password"
-  //       type="password"
-  //       value={password}
-  //       onChange={(e) => setPassword(e.target.value)}
-  //       placeholder="Password"
-  //     />
-  //     <button onClick={login}>Login</button>
-  //   </div>
-  // );
 }
 
 const appId = 'mKu4P0mSPKHy23MV7IzqCdRxZIMbEvcKlbQE56d7';
