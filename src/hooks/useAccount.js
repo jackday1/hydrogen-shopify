@@ -64,11 +64,12 @@ const useAccount = () => {
         address: account,
         network: NETWORK,
       });
+
       const token = tokens.find(
         (item) => item.associatedTokenAddress === ASSOCIATED_TOKEN_ADDRESS,
       );
       const tokenBalance = token ? token.amount : 0;
-      setBalance(tokenBalance);
+      setBalance(Number(tokenBalance));
     } catch (err) {
       console.error(err.message);
     }
