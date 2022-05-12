@@ -1,63 +1,51 @@
-import {useEffect, useState, useCallback} from 'react';
-import {useMoralis, useChain} from 'react-moralis';
+import {useEffect, useState, useCallback, useMemo} from 'react';
+import {useMoralis, useMoralisSolanaApi} from 'react-moralis';
 import axios from 'axios';
 
-import Token from '../abis/MIRL.json';
+import environments from '../utils/environments';
 
-const appId = 'mKu4P0mSPKHy23MV7IzqCdRxZIMbEvcKlbQE56d7';
-const serverUrl = 'https://6zitu24v62ou.usemoralis.com:2053/server';
+const {MORALIS_APP_ID, MORALIS_SERVER_URL, NETWORK, ASSOCIATED_TOKEN_ADDRESS} =
+  environments;
 
-const networkId = 1;
-const chainId = '0x1';
-
-const hasMetaMask =
+const hasWeb3 =
   typeof window !== 'undefined' && typeof window.ethereum !== 'undefined';
-const baseContractAddress =
-  networkId && Token.networks[networkId]
-    ? Token.networks[networkId].address
-    : null;
+
+const signingMessage =
+  'Connect your Phantom wallet to buy our merchandise with cheaper price!';
 
 const useAccount = () => {
-  const [web3, setWeb3] = useState(null);
-  const [baseContract, setBaseContract] = useState(null);
   const [balance, setBalance] = useState(null);
 
   const {
     authenticate,
     isInitialized,
+    isInitializing,
     initialize,
     logout,
     isAuthenticating,
     isAuthenticated,
     user,
-    account,
     Moralis,
   } = useMoralis();
 
-  const {chainId: currentChainId, switchNetwork} = useChain();
+  const account = useMemo(() => {
+    if (!user) return null;
+    return user.get('solAddress');
+  }, [user]);
+
+  const solanaApi = useMoralisSolanaApi();
 
   useEffect(() => {
     (async () => {
-      if (!Moralis.isWeb3Enabled()) {
-        await Moralis.enableWeb3();
-      }
-
       if (!isInitialized) {
-        initialize({appId, serverUrl});
+        initialize({appId: MORALIS_APP_ID, serverUrl: MORALIS_SERVER_URL});
       }
-
-      if (currentChainId !== chainId) {
-        await switchNetwork(chainId);
-      }
-
-      const _web3 = new window.Web3(Moralis.provider);
-      setWeb3(_web3);
     })();
   }, []);
 
-  const connectMetamaskWallet = async () => {
-    if (!hasMetaMask) {
-      alert('Please install metamask extension and reload page!');
+  const connectPhantomWallet = async () => {
+    if (!hasWeb3) {
+      alert('Please install Phantom wallet extension and reload page!');
       return;
     }
 
@@ -65,95 +53,43 @@ const useAccount = () => {
       await Moralis.enableWeb3();
     }
 
-    await authenticate();
-
-    const _web3 = new window.Web3(Moralis.provider);
-    setWeb3(_web3);
-
-    if (currentChainId !== chainId) {
-      await switchNetwork(chainId);
-    }
+    await authenticate({type: 'sol', signingMessage});
   };
 
   const getBalance = useCallback(async () => {
-    if (
-      !isAuthenticated ||
-      !currentChainId ||
-      !account ||
-      !baseContract ||
-      !baseContractAddress
-    )
-      return;
-    if (currentChainId !== chainId) {
-      setBalance(null);
-      return;
-    }
+    if (!isAuthenticated || !account) return;
 
     try {
-      const balanceOfResult = await Moralis.executeFunction({
-        contractAddress: baseContractAddress,
-        functionName: 'balanceOf',
-        abi: Token.abi,
-        params: {
-          owner: account,
-        },
+      const {tokens} = await solanaApi.account.getPortfolio({
+        address: account,
+        network: NETWORK,
       });
-      // console.log('balanceOf: ', balanceOfResult.toString());
-      setBalance(balanceOfResult.toNumber());
+      const token = tokens.find(
+        (item) => item.associatedTokenAddress === ASSOCIATED_TOKEN_ADDRESS,
+      );
+      const tokenBalance = token ? token.amount : 0;
+      setBalance(tokenBalance);
     } catch (err) {
       console.error(err.message);
-      // alert(JSON.stringify(err));
     }
-  }, [isAuthenticated, account, baseContract, currentChainId]);
-
-  useEffect(() => {
-    if (web3 && baseContractAddress) {
-      const _baseContract = new web3.eth.Contract(
-        Token.abi,
-        baseContractAddress,
-      );
-      setBaseContract(_baseContract);
-    }
-  }, [web3]);
+  }, [isAuthenticated, account, solanaApi]);
 
   useEffect(() => {
     getBalance();
   }, [getBalance]);
 
   useEffect(() => {
-    // auto link account when user change account
-    if (user && account) {
-      const accounts = user.attributes.accounts;
-      if (!accounts.includes(account)) {
-        Moralis.link(account).then(() => {
-          console.log(`Linked account ${account}`);
-          window.location.reload();
-        });
-      } else if (currentChainId && balance !== null) {
-        axios
-          .post('/auth/login', {
-            sessionToken: user.getSessionToken(),
-            account,
-            chainId: currentChainId,
-            balance,
-          })
-          .then((res) => res.data.reload && window.location.reload())
-          .catch((err) => console.error(err));
-      }
+    if (user && account && balance !== null) {
+      axios
+        .post('/auth/login', {
+          sessionToken: user.getSessionToken(),
+          account,
+          balance,
+        })
+        .then((res) => res.data.reload && window.location.reload())
+        .catch((err) => console.error(err));
     }
-    // if (user && account && currentChainId && balance !== null) {
-    //   // console.log('Call login api route');
-    //   axios
-    //     .post('/auth/login', {
-    //       sessionToken: user.getSessionToken(),
-    //       account,
-    //       chainId: currentChainId,
-    //       balance,
-    //     })
-    //     .then((res) => console.log(res))
-    //     .catch((err) => console.error(err));
-    // }
-  }, [user, account, currentChainId, balance]);
+  }, [user, account, balance]);
 
   const logOut = async () => {
     await logout();
@@ -161,21 +97,16 @@ const useAccount = () => {
     window.location.reload();
   };
 
-  // useEffect(() => {
-  //   if (isAuthenticated && isInitialized && (!account || !currentChainId)) {
-  //     connectMetamaskWallet();
-  //   }
-  // }, [isAuthenticated, isInitialized]);
-
   return {
     Moralis,
+    isInitializing,
     isAuthenticated,
     isAuthenticating,
     user,
     account,
     balance,
     logOut,
-    connectMetamaskWallet,
+    connectPhantomWallet,
   };
 };
 

@@ -2,14 +2,17 @@ import {useNavigate} from '@shopify/hydrogen/client';
 import {MoralisProvider} from 'react-moralis';
 
 import useAccount from '../hooks/useAccount';
+import environments from '../utils/environments';
+
+const {MORALIS_APP_ID, MORALIS_SERVER_URL} = environments;
 
 function Form() {
   const navigate = useNavigate();
-  const {isAuthenticated, account, user, balance, connectMetamaskWallet} =
+  const {isAuthenticated, account, user, balance, connectPhantomWallet} =
     useAccount();
 
   const login = async () => {
-    await connectMetamaskWallet();
+    await connectPhantomWallet();
     navigate('/', {replace: true});
   };
 
@@ -20,7 +23,7 @@ function Form() {
           className="bg-orange-500 rounded px-4 py-2 text-white font-semibold transition ease-in-out hover:bg-orange-600"
           onClick={login}
         >
-          Connect metamask wallet
+          Connect Phantom wallet
         </button>
       </div>
     );
@@ -42,17 +45,10 @@ function Form() {
   );
 }
 
-const appId = 'mKu4P0mSPKHy23MV7IzqCdRxZIMbEvcKlbQE56d7';
-const serverUrl = 'https://6zitu24v62ou.usemoralis.com:2053/server';
-
 export default function LoginForm() {
   return (
-    <MoralisProvider appId={appId} serverUrl={serverUrl}>
+    <MoralisProvider appId={MORALIS_APP_ID} serverUrl={MORALIS_SERVER_URL}>
       <Form />
     </MoralisProvider>
   );
 }
-
-// export default function LoginForm() {
-//   return <div>Login form</div>;
-// }

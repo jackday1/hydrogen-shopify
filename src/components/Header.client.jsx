@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Link, useNavigate} from '@shopify/hydrogen/client';
+import {Link} from '@shopify/hydrogen/client';
 import {MoralisProvider} from 'react-moralis';
 
 import CartToggle from './CartToggle.client';
@@ -10,28 +10,18 @@ import MobileNavigation from './MobileNavigation.client';
 import LogoutBtn from './LogoutBtn.client';
 import LoginBtn from './LoginBtn';
 import useAccount from '../hooks/useAccount';
+import environments from '../utils/environments';
 
-const appId = 'mKu4P0mSPKHy23MV7IzqCdRxZIMbEvcKlbQE56d7';
-const serverUrl = 'https://6zitu24v62ou.usemoralis.com:2053/server';
+const {MORALIS_APP_ID, MORALIS_SERVER_URL} = environments;
 
 /**
  * A client component that specifies the content of the header on the website
  */
 function Header({collections, storeName}) {
-  const navigate = useNavigate();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [scrollbarWidth, setScrollbarWidth] = useState(0);
   const {isCartOpen} = useCartUI();
-  const {
-    isAuthenticated,
-    account,
-    user,
-    balance,
-    connectMetamaskWallet,
-    logOut,
-  } = useAccount();
-
-  // console.log({account, user, balance});
+  const {isAuthenticated, connectPhantomWallet, logOut} = useAccount();
 
   useEffect(() => {
     const scrollbarWidth =
@@ -75,7 +65,7 @@ function Header({collections, storeName}) {
                   }}
                 />
               ) : (
-                <LoginBtn onClick={connectMetamaskWallet} />
+                <LoginBtn onClick={connectPhantomWallet} />
               )}
               <CartToggle
                 handleClick={() => {
@@ -92,7 +82,7 @@ function Header({collections, storeName}) {
 }
 
 export default (props) => (
-  <MoralisProvider appId={appId} serverUrl={serverUrl}>
+  <MoralisProvider appId={MORALIS_APP_ID} serverUrl={MORALIS_SERVER_URL}>
     <Header {...props} />
   </MoralisProvider>
 );

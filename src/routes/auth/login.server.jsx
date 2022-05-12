@@ -11,34 +11,29 @@ export async function api(request, {session}) {
     case 'POST':
       try {
         const data = await request.json();
-        const {sessionToken, account, chainId, balance} = data;
+        const {sessionToken, account, balance} = data;
 
         const user = await Moralis.User.become(sessionToken);
         if (!user) throw new Error('Bad credential');
 
-        if (!user.attributes.accounts.includes(account))
-          throw new Error('Bad credential 2');
+        if (!user.attributes.solAccounts.includes(account))
+          throw new Error('Bad credential account');
 
-        const sessionObject = await session.get();
-        const currentSessionToken = sessionObject.sessionToken;
-        const currentAccount = sessionObject.account;
-        const currentChainId = sessionObject.chainId;
+        const prevSession = await session.get();
+        const {sessionToken: prevSessionToken, account: prevSessionAccount} =
+          prevSession;
 
         const reload =
-          currentSessionToken !== sessionToken ||
-          currentAccount !== account ||
-          currentChainId !== chainId;
+          sessionToken !== prevSessionToken || account !== prevSessionAccount;
 
         await Promise.all([
           session.set('sessionToken', sessionToken),
           session.set('account', account),
-          session.set('chainId', chainId),
           session.set('balance', balance),
         ]);
 
         return new Response(JSON.stringify({reload}), {
           status: 200,
-          // headers: {'Set-Cookie': `accessToken=${accessToken}`},
         });
       } catch (err) {
         console.error(err.message);

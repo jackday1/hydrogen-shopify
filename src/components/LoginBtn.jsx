@@ -1,9 +1,9 @@
-import metamask from '../assets/metamask.png';
+import phantom from '../assets/phantom.png';
 
 const LoginBtn = ({onClick}) => {
   return (
-    <button title="Connect metamask" onClick={onClick}>
-      <img src={metamask} alt="login" />
+    <button className="mr-2" title="Connect Phantom wallet" onClick={onClick}>
+      <img src={phantom} alt="login" />
     </button>
   );
 };
