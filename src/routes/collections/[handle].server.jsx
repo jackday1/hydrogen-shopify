@@ -1,4 +1,10 @@
-import {useShop, useShopQuery, flattenConnection, Seo} from '@shopify/hydrogen';
+import {
+  useShop,
+  useShopQuery,
+  useSession,
+  flattenConnection,
+  Seo,
+} from '@shopify/hydrogen';
 import gql from 'graphql-tag';
 
 import LoadMoreProducts from '../../components/LoadMoreProducts.client';
@@ -11,6 +17,11 @@ export default function Collection({
   collectionProductCount = 24,
   params,
 }) {
+  const session = useSession();
+  const {balance} = session;
+
+  const isShowExclusive = balance && balance > 0;
+
   const {languageCode} = useShop();
 
   const {handle} = params;
@@ -25,7 +36,10 @@ export default function Collection({
     preload: true,
   });
 
-  if (data?.collection == null) {
+  if (
+    data?.collection == null ||
+    (handle === 'mirl-exclusive' && !isShowExclusive)
+  ) {
     return <NotFound />;
   }
 

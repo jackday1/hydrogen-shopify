@@ -1,6 +1,7 @@
 import {
   useShop,
   useShopQuery,
+  useSession,
   flattenConnection,
   LocalizationProvider,
   CacheHours,
@@ -8,7 +9,6 @@ import {
 import gql from 'graphql-tag';
 
 import Header from './Header.client';
-import Footer from './Footer.server';
 import Cart from './Cart.client';
 import {Suspense} from 'react';
 
@@ -17,6 +17,39 @@ import {Suspense} from 'react';
  */
 export default function Layout({children, hero}) {
   const {languageCode} = useShop();
+  const session = useSession();
+  const {balance} = session;
+
+  const isShowExclusive = balance && balance > 0;
+  const collectionQuery = isShowExclusive
+    ? ''
+    : `, query: "-title:'MIRL exclusive'"`;
+
+  const QUERY = gql`
+    query layoutContent($language: LanguageCode, $numCollections: Int!)
+    @inContext(language: $language) {
+      shop {
+        name
+      }
+      collections(first: $numCollections${collectionQuery}) {
+        edges {
+          node {
+            description
+            handle
+            id
+            title
+            image {
+              id
+              url
+              altText
+              width
+              height
+            }
+          }
+        }
+      }
+    }
+  `;
 
   const {data} = useShopQuery({
     query: QUERY,
@@ -27,8 +60,8 @@ export default function Layout({children, hero}) {
     cache: CacheHours(),
     preload: '*',
   });
+
   const collections = data ? flattenConnection(data.collections) : null;
-  const products = data ? flattenConnection(data.products) : null;
   const storeName = data ? data.shop.name : '';
 
   return (
@@ -53,41 +86,7 @@ export default function Layout({children, hero}) {
             <Suspense fallback={null}>{children}</Suspense>
           </div>
         </main>
-        <Footer collection={collections[0]} product={products[0]} />
       </div>
     </LocalizationProvider>
   );
 }
-
-const QUERY = gql`
-  query layoutContent($language: LanguageCode, $numCollections: Int!)
-  @inContext(language: $language) {
-    shop {
-      name
-    }
-    collections(first: $numCollections) {
-      edges {
-        node {
-          description
-          handle
-          id
-          title
-          image {
-            id
-            url
-            altText
-            width
-            height
-          }
-        }
-      }
-    }
-    products(first: 1) {
-      edges {
-        node {
-          handle
-        }
-      }
-    }
-  }
-`;
