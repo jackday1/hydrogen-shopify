@@ -1,6 +1,5 @@
 import {useEffect, useState} from 'react';
 import {Link} from '@shopify/hydrogen/client';
-import {MoralisProvider} from 'react-moralis';
 
 import CartToggle from './CartToggle.client';
 import {useCartUI} from './CartUIProvider.client';
@@ -9,19 +8,16 @@ import Navigation from './Navigation.client';
 import MobileNavigation from './MobileNavigation.client';
 import LogoutBtn from './LogoutBtn.client';
 import LoginBtn from './LoginBtn';
-import useAccount from '../hooks/useAccount';
-import environments from '../utils/environments';
-
-const {MORALIS_APP_ID, MORALIS_SERVER_URL} = environments;
+import useSolana from '../hooks/useSolana';
 
 /**
  * A client component that specifies the content of the header on the website
  */
-function Header({collections, storeName}) {
+export default function Header({collections, storeName, isLogged}) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [scrollbarWidth, setScrollbarWidth] = useState(0);
   const {isCartOpen} = useCartUI();
-  const {isAuthenticated, connectPhantomWallet, logOut} = useAccount();
+  const {connected, connectHandler, disconnectHandler} = useSolana(isLogged);
 
   useEffect(() => {
     const scrollbarWidth =
@@ -57,15 +53,16 @@ function Header({collections, storeName}) {
               {storeName}
             </Link>
             <div className="flex items-center">
-              {isAuthenticated ? (
+              {connected ? (
                 <LogoutBtn
                   onClick={() => {
                     console.log('Logout');
-                    logOut();
+                    // logOut();
+                    disconnectHandler();
                   }}
                 />
               ) : (
-                <LoginBtn onClick={connectPhantomWallet} />
+                <LoginBtn onClick={connectHandler} />
               )}
               <CartToggle
                 handleClick={() => {
@@ -80,9 +77,3 @@ function Header({collections, storeName}) {
     </header>
   );
 }
-
-export default (props) => (
-  <MoralisProvider appId={MORALIS_APP_ID} serverUrl={MORALIS_SERVER_URL}>
-    <Header {...props} />
-  </MoralisProvider>
-);

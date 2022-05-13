@@ -18,7 +18,7 @@ import {Suspense} from 'react';
 export default function Layout({children, hero}) {
   const {languageCode} = useShop();
   const session = useSession();
-  const {balance} = session;
+  const {balance, publicKey} = session;
 
   const isShowExclusive = balance && balance > 0;
   const collectionQuery = isShowExclusive
@@ -77,7 +77,11 @@ export default function Layout({children, hero}) {
       <div className="min-h-screen max-w-screen text-gray-700 font-sans">
         {/* TODO: Find out why Suspense needs to be here to prevent hydration errors. */}
         <Suspense fallback={null}>
-          <Header collections={collections} storeName={storeName} />
+          <Header
+            collections={collections}
+            storeName={storeName}
+            isLogged={!!publicKey}
+          />
           <Cart />
         </Suspense>
         <main role="main" id="mainContent" className="relative bg-gray-50">
