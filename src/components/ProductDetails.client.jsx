@@ -10,6 +10,9 @@ import {
   BuyNowButton,
 } from '@shopify/hydrogen/client';
 import {useState} from 'react';
+
+import {useWallet} from '@solana/wallet-adapter-react';
+
 import ProductOptions from './ProductOptions.client';
 import Gallery from './Gallery.client';
 import {
@@ -17,6 +20,7 @@ import {
   BUTTON_SECONDARY_CLASSES,
 } from './Button.client';
 import CryptoCheckout from './CryptoCheckout.client';
+import WalletWrapper from './WalletWrapper.client';
 
 function AddToCartMarkup() {
   const [isOpen, setIsOpen] = useState(false);
@@ -129,7 +133,7 @@ function ProductPrices() {
   );
 }
 
-export default function ProductDetails({product}) {
+function ProductDetails({product}) {
   const initialVariant = flattenConnection(product.variants)[0];
 
   const productMetafields = useParsedMetafields(product.metafields);
@@ -146,6 +150,9 @@ export default function ProductDetails({product}) {
       metafield.namespace === 'my_fields' &&
       metafield.key === 'lifetime_warranty',
   );
+
+  const {publicKey} = useWallet();
+  console.log({publicKey});
 
   return (
     <>
@@ -252,5 +259,13 @@ export default function ProductDetails({product}) {
         </div>
       </ProductProvider>
     </>
+  );
+}
+
+export default function ProductDetailWrapper(props) {
+  return (
+    <WalletWrapper>
+      <ProductDetails {...props} />
+    </WalletWrapper>
   );
 }
