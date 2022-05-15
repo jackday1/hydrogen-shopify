@@ -1,23 +1,60 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useMemo} from 'react';
 import {Link} from '@shopify/hydrogen/client';
+
+import {ConnectionProvider, WalletProvider} from '@solana/wallet-adapter-react';
+import {WalletAdapterNetwork} from '@solana/wallet-adapter-base';
+import {
+  GlowWalletAdapter,
+  PhantomWalletAdapter,
+  SlopeWalletAdapter,
+  SolflareWalletAdapter,
+  SolletExtensionWalletAdapter,
+  SolletWalletAdapter,
+  TorusWalletAdapter,
+} from '@solana/wallet-adapter-wallets';
+import {
+  WalletModalProvider,
+  WalletDisconnectButton,
+  WalletMultiButton,
+} from '@solana/wallet-adapter-react-ui';
+import {clusterApiUrl} from '@solana/web3.js';
+
+// Default styles that can be overridden by your app
+import '@solana/wallet-adapter-react-ui/styles.css';
 
 import CartToggle from './CartToggle.client';
 import {useCartUI} from './CartUIProvider.client';
 import CountrySelector from './CountrySelector.client';
 import Navigation from './Navigation.client';
 import MobileNavigation from './MobileNavigation.client';
-import LogoutBtn from './LogoutBtn.client';
-import LoginBtn from './LoginBtn';
-import useSolana from '../hooks/useSolana';
+
+import useSolanaWallet from '../hooks/useSolanaWallet';
+import environments from '../utils/environments';
+
+const network = environments.NETWORK;
+
+// You can also provide a custom RPC endpoint.
+const endpoint = clusterApiUrl(network);
+
+// @solana/wallet-adapter-wallets includes all the adapters but supports tree shaking and lazy loading --
+// Only the wallets you configure here will be compiled into your application, and only the dependencies
+// of wallets that your users connect to will be loaded.
+const wallets = [
+  new PhantomWalletAdapter(),
+  new GlowWalletAdapter(),
+  new SlopeWalletAdapter(),
+  new SolflareWalletAdapter({network}),
+  new TorusWalletAdapter(),
+];
 
 /**
  * A client component that specifies the content of the header on the website
  */
-export default function Header({collections, storeName, isLogged}) {
+function Header({collections, storeName}) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [scrollbarWidth, setScrollbarWidth] = useState(0);
   const {isCartOpen} = useCartUI();
-  const {connected, connectHandler, disconnectHandler} = useSolana(isLogged);
+  useSolanaWallet();
 
   useEffect(() => {
     const scrollbarWidth =
@@ -52,18 +89,9 @@ export default function Header({collections, storeName, isLogged}) {
             >
               {storeName}
             </Link>
-            <div className="flex items-center">
-              {connected ? (
-                <LogoutBtn
-                  onClick={() => {
-                    console.log('Logout');
-                    // logOut();
-                    disconnectHandler();
-                  }}
-                />
-              ) : (
-                <LoginBtn onClick={connectHandler} />
-              )}
+            <div className="flex items-center space-x-2">
+              <WalletMultiButton />
+              <WalletDisconnectButton />
               <CartToggle
                 handleClick={() => {
                   if (isMobileNavOpen) setIsMobileNavOpen(false);
@@ -75,5 +103,17 @@ export default function Header({collections, storeName, isLogged}) {
         </div>
       </div>
     </header>
+  );
+}
+
+export default function HeaderWrapper(props) {
+  return (
+    <ConnectionProvider endpoint={endpoint}>
+      <WalletProvider wallets={wallets} autoConnect>
+        <WalletModalProvider>
+          <Header {...props} />
+        </WalletModalProvider>
+      </WalletProvider>
+    </ConnectionProvider>
   );
 }
