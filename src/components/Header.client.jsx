@@ -47,7 +47,7 @@ function Header({collections, storeName}) {
             paddingRight: isCartOpen ? scrollbarWidth : 0,
           }}
         >
-          <div className="text-center w-full flex justify-between items-center">
+          <div className="text-center w-full flex justify-between items-center relative">
             <CountrySelector />
             <MobileNavigation
               collections={collections}
@@ -55,7 +55,8 @@ function Header({collections, storeName}) {
               setIsOpen={setIsMobileNavOpen}
             />
             <Link
-              className="font-black uppercase text-3xl tracking-widest"
+              className="font-black uppercase text-3xl tracking-widest absolute left-1/2"
+              style={{transform: 'translateX(-50%)'}}
               to="/"
             >
               {storeName}
