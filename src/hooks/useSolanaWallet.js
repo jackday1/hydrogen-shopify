@@ -31,14 +31,20 @@ const useSolanaWallet = () => {
   const getBalance = async () => {
     try {
       if (!publicKey) return;
-      const result = await connection.getParsedTokenAccountsByOwner(publicKey, {
-        mint: new PublicKey(ASSOCIATED_TOKEN_ADDRESS),
-      });
-      const newBalance = get(
-        result,
-        'value[0].account.data.parsed.info.tokenAmount.uiAmount',
-        0,
-      );
+      // use sol for the moment
+      // change to our own token later
+      const solBalance = await connection.getBalance(publicKey);
+      const newBalance = solBalance / 1e9;
+
+      // code to get balance of our own token
+      // const result = await connection.getParsedTokenAccountsByOwner(publicKey, {
+      //   mint: new PublicKey(ASSOCIATED_TOKEN_ADDRESS),
+      // });
+      // const newBalance = get(
+      //   result,
+      //   'value[0].account.data.parsed.info.tokenAmount.uiAmount',
+      //   0,
+      // );
       setBalance(newBalance);
     } catch (err) {
       console.error(err);

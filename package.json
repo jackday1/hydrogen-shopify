@@ -50,6 +50,7 @@
     "axios": "^0.27.2",
     "body-parser": "^1.20.0",
     "compression": "^1.7.4",
+    "easy-spl": "^0.5.0",
     "graphql-tag": "^2.12.4",
     "lodash": "^4.17.21",
     "react": "0.0.0-experimental-2bf7c02f0-20220314",

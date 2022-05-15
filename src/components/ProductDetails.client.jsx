@@ -10,8 +10,9 @@ import {
   BuyNowButton,
 } from '@shopify/hydrogen/client';
 import {useState} from 'react';
-
-import {useWallet} from '@solana/wallet-adapter-react';
+import {Wallet} from 'easy-spl';
+import {PublicKey} from '@solana/web3.js';
+import {useWallet, useConnection} from '@solana/wallet-adapter-react';
 
 import ProductOptions from './ProductOptions.client';
 import Gallery from './Gallery.client';
@@ -21,6 +22,12 @@ import {
 } from './Button.client';
 import CryptoCheckout from './CryptoCheckout.client';
 import WalletWrapper from './WalletWrapper.client';
+
+import environments from '../utils/environments';
+import convertToCrypto from '../utils/convertToCryto';
+import createOrder from '../utils/createOrder';
+
+const {RECEIVER_ADDRESS, TOKEN_SYMBOL} = environments;
 
 function AddToCartMarkup() {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,14 +39,55 @@ function AddToCartMarkup() {
     priceV2: {amount, currencyCode},
   } = selectedVariant;
 
+  const {connection} = useConnection();
+  const wallet = useWallet();
+  const solanaWallet = new Wallet(connection, wallet);
+
+  const text = `Pay ${convertToCrypto(
+    amount,
+    currencyCode,
+    TOKEN_SYMBOL,
+  )} ${TOKEN_SYMBOL} for this product?`;
+  const transfer = async (email) => {
+    try {
+      // convert price to crypto
+      const cryptoAmount = 0.5;
+
+      // use sol for the moment
+      // change to our own token later
+      const transactionSignature = await solanaWallet.transferSol(
+        new PublicKey(RECEIVER_ADDRESS),
+        cryptoAmount,
+      );
+
+      const data = {
+        productId: id,
+        amount: 1,
+        email,
+        transactionSignature,
+      };
+      console.log({data});
+      // await createOrder(data)
+
+      // send this data to server to validate and create order
+
+      // close modal
+      setIsOpen(false);
+
+      // reload page to re-get balance (for the moment)
+      // window.location.reload();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="space-y-2 mb-8">
       <CryptoCheckout
         isOpen={isOpen}
         close={() => setIsOpen(false)}
-        id={id}
-        price={Number(amount)}
-        currencyCode={currencyCode}
+        text={text}
+        transfer={transfer}
       />
       <button
         className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -150,9 +198,6 @@ function ProductDetails({product}) {
       metafield.namespace === 'my_fields' &&
       metafield.key === 'lifetime_warranty',
   );
-
-  const {publicKey} = useWallet();
-  console.log({publicKey});
 
   return (
     <>
