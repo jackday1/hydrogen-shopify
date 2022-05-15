@@ -61,7 +61,7 @@ function AddToCartMarkup() {
       );
 
       const data = {
-        productId: id,
+        productIds: [id],
         amount: 1,
         email,
         transactionSignature,
