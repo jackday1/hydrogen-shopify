@@ -9,19 +9,40 @@ import {
   AddToCartButton,
   BuyNowButton,
 } from '@shopify/hydrogen/client';
+import {useState} from 'react';
 import ProductOptions from './ProductOptions.client';
 import Gallery from './Gallery.client';
 import {
   BUTTON_PRIMARY_CLASSES,
   BUTTON_SECONDARY_CLASSES,
 } from './Button.client';
+import CryptoCheckout from './CryptoCheckout.client';
 
 function AddToCartMarkup() {
+  const [isOpen, setIsOpen] = useState(false);
   const {selectedVariant} = useProduct();
   const isOutOfStock = !selectedVariant.availableForSale;
 
+  const {
+    id,
+    priceV2: {amount, currencyCode},
+  } = selectedVariant;
+
   return (
     <div className="space-y-2 mb-8">
+      <CryptoCheckout
+        isOpen={isOpen}
+        close={() => setIsOpen(false)}
+        id={id}
+        price={Number(amount)}
+        currencyCode={currencyCode}
+      />
+      <button
+        className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        onClick={() => setIsOpen(true)}
+      >
+        Buy with crypto currency
+      </button>
       <AddToCartButton
         className={BUTTON_PRIMARY_CLASSES}
         disabled={isOutOfStock}
