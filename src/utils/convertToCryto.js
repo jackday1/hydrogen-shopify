@@ -1,7 +1,7 @@
 const convertToCrypto = (amount, currencyCode, tokenSymbol) => {
   console.log('Convert to crypto', {amount, currencyCode, tokenSymbol});
 
-  const cryptoAmount = 0.5;
+  const cryptoAmount = amount * 0.00016;
   return cryptoAmount;
 };
 

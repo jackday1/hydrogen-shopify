@@ -43,16 +43,15 @@ function AddToCartMarkup() {
   const wallet = useWallet();
   const solanaWallet = new Wallet(connection, wallet);
 
-  const text = `Pay ${convertToCrypto(
-    amount,
+  const cryptoAmount = convertToCrypto(
+    Number(amount),
     currencyCode,
     TOKEN_SYMBOL,
-  )} ${TOKEN_SYMBOL} for this product?`;
+  );
+
+  const text = `Pay ${cryptoAmount} ${TOKEN_SYMBOL} for this product?`;
   const transfer = async (email) => {
     try {
-      // convert price to crypto
-      const cryptoAmount = 0.5;
-
       // use sol for the moment
       // change to our own token later
       const transactionSignature = await solanaWallet.transferSol(
