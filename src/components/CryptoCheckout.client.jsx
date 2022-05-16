@@ -30,7 +30,6 @@ const CryptoCheckout = ({isOpen, close, text, transfer}) => {
         className="w-50 px-4 py-2 bg-white rounded shadow space-y-2"
         onClick={(e) => e.stopPropagation()}
       >
-        <p>{text}</p>
         <input
           type="text"
           placeholder="Enter your email"
@@ -43,7 +42,7 @@ const CryptoCheckout = ({isOpen, close, text, transfer}) => {
           onClick={doTransfer}
           disabled={isLoading}
         >
-          Buy with crypto currency
+          {text}
         </button>
       </div>
     </div>

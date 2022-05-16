@@ -49,7 +49,7 @@ function AddToCartMarkup() {
     TOKEN_SYMBOL,
   );
 
-  const text = `Pay ${cryptoAmount} ${TOKEN_SYMBOL} for this product?`;
+  const text = `Pay ${cryptoAmount} ${TOKEN_SYMBOL}`;
   const transfer = async (email) => {
     try {
       // use sol for the moment
