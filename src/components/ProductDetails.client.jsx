@@ -60,7 +60,7 @@ function AddToCartMarkup() {
       );
 
       const data = {
-        order: [{id, quantity: 1}],
+        order: [{variant_id: id, quantity: 1}],
         email,
         transactionSignature,
         chainId: NETWORK,
