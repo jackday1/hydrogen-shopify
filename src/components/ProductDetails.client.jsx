@@ -59,14 +59,16 @@ function AddToCartMarkup() {
         cryptoAmount,
       );
 
+      const variantIdSplitted = id.split('/');
+
       const data = {
-        order: [{variant_id: id, quantity: 1}],
+        order: [{variant_id: variantIdSplitted.reverse()[0], quantity: 1}],
         email,
         transactionSignature,
         chainId: NETWORK,
       };
       console.log({data});
-      // await createOrder(data)
+      await createOrder(data);
 
       // send this data to server to validate and create order
 

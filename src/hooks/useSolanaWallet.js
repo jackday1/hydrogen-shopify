@@ -26,9 +26,9 @@ const useSolanaWallet = () => {
     provider?.on('accountChanged', () => {
       window.location.reload();
     });
-    provider?.on('disconnect', () => {
-      window.location.reload();
-    });
+    // provider?.on('disconnect', () => {
+    //   window.location.reload();
+    // });
   }, [provider]);
 
   const getBalance = async () => {
