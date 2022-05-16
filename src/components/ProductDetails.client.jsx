@@ -27,7 +27,7 @@ import environments from '../utils/environments';
 import convertToCrypto from '../utils/convertToCryto';
 import createOrder from '../utils/createOrder';
 
-const {RECEIVER_ADDRESS, TOKEN_SYMBOL} = environments;
+const {RECEIVER_ADDRESS, TOKEN_SYMBOL, NETWORK} = environments;
 
 function AddToCartMarkup() {
   const [isOpen, setIsOpen] = useState(false);
@@ -60,10 +60,10 @@ function AddToCartMarkup() {
       );
 
       const data = {
-        productIds: [id],
-        amount: 1,
+        order: [{id, quantity: 1}],
         email,
         transactionSignature,
+        chainId: NETWORK,
       };
       console.log({data});
       // await createOrder(data)
